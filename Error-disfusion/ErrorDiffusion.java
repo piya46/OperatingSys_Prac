@@ -92,11 +92,11 @@ public class ErrorDiffusion {
         int width = byteImage[0].length;
         BufferedImage outputImage = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
 
-        for (int y = 1; y < height - 1; y++) {
-            for (int x = 1; x < width - 1; x++) {
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
                 int gray = Byte.toUnsignedInt(byteImage[y][x]);
                 int rgb = (gray << 16) | (gray << 8) | gray;
-                outputImage.setRGB(x - 1, y - 1, rgb); // ลดขอบ
+                outputImage.setRGB(x, y, rgb);
             }
         }
 
@@ -105,7 +105,8 @@ public class ErrorDiffusion {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         // อ่านภาพจากไฟล์
-        File inputFile = new File("miraidon.png");
+        String fileName = "miraidon.png";
+        File inputFile = new File(fileName);
         BufferedImage inputImage = ImageIO.read(inputFile);
 
         int width = inputImage.getWidth();
@@ -114,6 +115,13 @@ public class ErrorDiffusion {
 
         // แปลงภาพเป็น byte[][] สำหรับการประมวลผล
         byte[][] inputByteArray = convertImageToByteArray(inputImage);
+
+        // บันทึกภาพที่เป็น Grayscale ก่อนประมวลผล
+        BufferedImage grayImage = convertByteArrayToImage(inputByteArray);
+        File grayOutputFile = new File("%s_gray_output.png");
+        ImageIO.write(grayImage, "png", grayOutputFile);
+
+        System.out.println("บันทึกภาพ Grayscale เรียบร้อย");
 
         // เริ่มการกระจายความผิดพลาด
         ErrorDiffusion errorDiffusion = new ErrorDiffusion(width, height, numThreads);
@@ -127,9 +135,9 @@ public class ErrorDiffusion {
         BufferedImage outputImage = convertByteArrayToImage(outputByteArray);
 
         // บันทึกภาพที่ประมวลผลแล้วไปยังไฟล์
-        File outputFile = new File("output.png");
+        File outputFile = new File("%s_output_diffusion.png");
         ImageIO.write(outputImage, "png", outputFile);
 
-        System.out.println("การประมวลผลเสร็จสมบูรณ์และบันทึกภาพเป็น output.png");
+        System.out.println("บันทึกภาพที่ประมวลผลgเสร็จแล้ว");
     }
 }
